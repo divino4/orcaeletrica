@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>OrçaElétrica</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#11151c">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <svg class="trace-bg" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 45 H90 L110 25 H180 L195 40 H260 L275 15 H400" stroke="currentColor" stroke-width="1" fill="none"/>
+    <circle cx="110" cy="25" r="2.5" fill="currentColor"/>
+    <circle cx="195" cy="40" r="2.5" fill="currentColor"/>
+    <circle cx="275" cy="15" r="2.5" fill="currentColor"/>
+  </svg>
+  <div class="topbar-inner">
+    <span class="logo-mark">⏚</span>
+    <div>
+      <h1>OrçaElétrica</h1>
+      <p class="subtitle">Orçamento de instalações · NBR 5410</p>
+    </div>
+  </div>
+</header>
+
+<main id="view-ambientes" class="view active">
+  <section class="card form-card">
+    <h2>Novo ambiente</h2>
+    <form id="form-ambiente">
+      <label>Nome do ambiente
+        <input type="text" id="amb-nome" placeholder="Ex.: Quarto 1" required>
+      </label>
+
+      <label>Tipo de ambiente
+        <select id="amb-tipo">
+          <option value="sala">Sala / Estar</option>
+          <option value="quarto">Quarto / Dormitório</option>
+          <option value="cozinha">Cozinha</option>
+          <option value="banheiro">Banheiro</option>
+          <option value="areaServico">Área de serviço</option>
+          <option value="garagem">Garagem</option>
+          <option value="corredor">Corredor / Hall</option>
+          <option value="outro">Outro</option>
+        </select>
+      </label>
+
+      <div class="grid-3">
+        <label>Largura (m)
+          <input type="number" id="amb-largura" step="0.01" min="0.1" inputmode="decimal" required>
+        </label>
+        <label>Comprimento (m)
+          <input type="number" id="amb-comprimento" step="0.01" min="0.1" inputmode="decimal" required>
+        </label>
+        <label>Pé-direito (m)
+          <input type="number" id="amb-altura" step="0.01" min="1.8" value="2.70" inputmode="decimal" required>
+        </label>
+      </div>
+
+      <label>Distância do ambiente até o quadro de distribuição (m)
+        <input type="number" id="amb-distancia" step="0.1" min="0" inputmode="decimal" required>
+      </label>
+      <p class="hint">Percurso horizontal aproximado (pelo teto/parede) até o QDC — essencial para calcular metragem de fio e eletroduto.</p>
+
+      <div class="grid-3">
+        <label>Pontos de luz
+          <input type="number" id="amb-luz" min="0" step="1" required>
+        </label>
+        <label>Interruptores
+          <input type="number" id="amb-interruptor" min="0" step="1" required>
+        </label>
+        <label>Tomadas
+          <input type="number" id="amb-tomada" min="0" step="1" required>
+        </label>
+      </div>
+      <p class="hint">Sugestão automática conforme as dimensões — ajuste os números acima livremente antes de adicionar.</p>
+
+      <button type="submit" class="btn-primary">+ Adicionar ambiente</button>
+    </form>
+  </section>
+
+  <section class="list-header">
+    <h2>Ambientes cadastrados</h2>
+    <span id="amb-count" class="count-pill">0</span>
+  </section>
+
+  <div id="lista-ambientes" class="ambientes-list">
+    <p class="empty-state">Nenhum ambiente cadastrado ainda.<br>Preencha o formulário acima para começar.</p>
+  </div>
+</main>
+
+<main id="view-config" class="view">
+  <section class="card">
+    <h2>Dados da obra</h2>
+    <p class="hint">Aparecem no cabeçalho do relatório impresso.</p>
+
+    <label>Cliente / Proprietário
+      <input type="text" id="obra-cliente" placeholder="Nome completo">
+    </label>
+    <label>Endereço da obra
+      <input type="text" id="obra-endereco" placeholder="Rua, número, bairro, cidade">
+    </label>
+    <label>Telefone / Contato
+      <input type="text" id="obra-telefone" placeholder="(00) 00000-0000">
+    </label>
+    <label>Responsável técnico / Eletricista
+      <input type="text" id="obra-responsavel" placeholder="Nome do responsável">
+    </label>
+    <label>Data do orçamento
+      <input type="date" id="obra-data">
+    </label>
+
+    <label>Tipo de instalação
+      <select id="obra-tipo-instalacao">
+        <option value="residencial">Residencial</option>
+        <option value="comercial">Comercial</option>
+        <option value="industrial">Industrial</option>
+      </select>
+    </label>
+    <label>Sistema de alimentação
+      <select id="obra-ligacao">
+        <option value="mono127">Monofásico 127 V (fase + neutro)</option>
+        <option value="mono220">Monofásico 220 V (fase + neutro)</option>
+        <option value="bi127220">Bifásico 127/220 V (2 fases + neutro)</option>
+        <option value="tri220">Trifásico 220 V (3 fases + neutro)</option>
+        <option value="tri380">Trifásico 380 V (3 fases + neutro)</option>
+      </select>
+    </label>
+
+    <button id="btn-salvar-obra" class="btn-primary">Salvar dados da obra</button>
+    <p id="obra-saved-msg" class="saved-msg">Dados salvos ✓</p>
+  </section>
+
+  <section class="card">
+    <h2>Materiais — condutor e eletroduto</h2>
+    <p class="hint">Percentual acrescido ao cálculo automático de metragem, para cobrir emendas, cortes e curvas.</p>
+    <label>% de perda/folga
+      <input type="number" id="cfg-perda" step="1" min="0" max="50" inputmode="decimal">
+    </label>
+    <button id="btn-salvar-perda" class="btn-primary">Salvar</button>
+    <p id="perda-saved-msg" class="saved-msg">Valor salvo ✓</p>
+  </section>
+
+  <section class="card">
+    <h2>Mão de obra</h2>
+    <p class="hint">Valores definidos por você, aplicados a todos os ambientes do orçamento.</p>
+
+    <label>Valor por ponto de tomada (R$)
+      <input type="number" id="cfg-tomada" step="0.01" min="0" inputmode="decimal">
+    </label>
+    <label>Valor por ponto de luz (R$)
+      <input type="number" id="cfg-luz" step="0.01" min="0" inputmode="decimal">
+    </label>
+    <label>Valor por ponto de interruptor (R$)
+      <input type="number" id="cfg-interruptor" step="0.01" min="0" inputmode="decimal">
+    </label>
+
+    <button id="btn-salvar-config" class="btn-primary">Salvar valores</button>
+    <p id="config-saved-msg" class="saved-msg">Valores salvos ✓</p>
+  </section>
+
+  <section class="card">
+    <h2>Sobre os cálculos</h2>
+    <p class="hint">
+      As quantidades de pontos são estimadas pela regra prática da NBR 5410
+      (iluminação mínima, TUGs por perímetro e por cômodo). As alturas de
+      instalação seguem valores usuais de mercado e podem ser ajustadas em
+      cada ambiente conforme o projeto. Esta ferramenta auxilia o orçamento;
+      o projeto elétrico final deve ser elaborado ou revisado por profissional
+      habilitado.
+    </p>
+  </section>
+</main>
+
+<main id="view-relatorio" class="view">
+  <section class="card" id="relatorio-obra"></section>
+
+  <section class="card" id="relatorio-resumo">
+    <h2>Resumo geral</h2>
+    <div id="resumo-vazio" class="empty-state">Cadastre ao menos um ambiente para gerar o relatório.</div>
+    <div id="resumo-conteudo" style="display:none">
+      <div class="resumo-grid">
+        <div class="resumo-item">
+          <span class="resumo-valor" id="total-luz">0</span>
+          <span class="resumo-label">Pontos de luz</span>
+        </div>
+        <div class="resumo-item">
+          <span class="resumo-valor" id="total-interruptor">0</span>
+          <span class="resumo-label">Interruptores</span>
+        </div>
+        <div class="resumo-item">
+          <span class="resumo-valor" id="total-tomada">0</span>
+          <span class="resumo-label">Tomadas</span>
+        </div>
+        <div class="resumo-item">
+          <span class="resumo-valor" id="total-disjuntores">0</span>
+          <span class="resumo-label">Disjuntores</span>
+        </div>
+      </div>
+      <div class="total-geral">
+        <span>Mão de obra total</span>
+        <strong id="total-mao-obra">R$ 0,00</strong>
+      </div>
+      <button id="btn-imprimir" class="btn-primary">🖨️ Imprimir / salvar PDF</button>
+    </div>
+  </section>
+
+  <div id="relatorio-detalhe"></div>
+
+  <div id="relatorio-quadro"></div>
+</main>
+
+<nav class="tabbar">
+  <button class="tab-btn active" data-view="ambientes">
+    <span class="tab-icon">🏠</span>Ambientes
+  </button>
+  <button class="tab-btn" data-view="config">
+    <span class="tab-icon">⚙️</span>Configurações
+  </button>
+  <button class="tab-btn" data-view="relatorio">
+    <span class="tab-icon">📋</span>Relatório
+  </button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
